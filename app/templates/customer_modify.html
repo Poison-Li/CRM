@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Modify</title>
+    <script src="../static/customer/customer_do_xml.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+</head>
+<body>
+<br/>
+<br/>
+<br/>
+<form id="form" name="form">
+    name:<input type="text"/>
+    sex:<input type="text"/>
+    age:<input type="text"/>
+    phone:<input type="text"/>
+</form>
+<button type="submit" onclick="javascript:msubmit()">提交</button>
+</body>
+
+<script>
+    function msubmit() {
+        id = '{{ id|safe }}'//
+
+        var form = document.getElementById('form')
+        if (form[0].value == '' || form[1].value == '' || form[2].value == '' || form[3].value == '') {
+            alert('error');
+            return '';
+        }
+        //console.log(form[0].value);
+        content = add(form[0].value, form[1].value, form[2].value, form[3].value);
+        // console.log(content);
+        var oSerializer = new XMLSerializer();
+        var sXML = oSerializer.serializeToString(content);
+        $.ajax({
+            url: '/customer/modify/',
+            data: JSON.stringify({
+                'id': id,
+                'info': sXML
+            }),
+            type: 'post',
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                if (data.msg == 'success') {
+                    window.location.href = document.referrer;
+
+                }
+            }
+        });
+    }
+
+
+</script>
+</html>

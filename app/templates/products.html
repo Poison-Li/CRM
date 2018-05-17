@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src={{ url_for('static', filename='product/product_do_xml.js') }}></script>
+
+</head>
+<body>
+
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="row clearfix">
+				<div class="col-md-12 column">
+					<h3>
+					    CRM系统
+                    </h3>
+                    <ul>
+                        <li><a href={{ url_for('customer.get_customers') }}>customer</a></li>
+                        <li><a href={{ url_for('trade.get_trades') }}>trade</a></li>
+                    </ul>
+				</div>
+			</div>
+			<div class="row clearfix">
+				<div class="col-md-12 column">
+					<table class="table" id="table">
+						<thead>
+							<tr>
+								<th>
+									ID
+								</th>
+								<th>
+									名称
+								</th>
+								<th>
+									数量
+								</th>
+								<th>
+									单价
+								</th>
+                                <th>
+									备注
+								</th>
+                                <th id='modify'>
+                                    修改
+                                </th>
+                                <th id="delete">
+                                    删除
+                                </th>
+							</tr>
+						</thead>
+						<tbody id="tbody">
+
+						</tbody>
+					</table>
+				</div>
+                <div>
+                      <form id="form" name="form">
+                        名称:<input type="text"/>
+                        数量:<input type="text"/>
+                        单价:<input type="text"/>
+                        备注:<input type="text"/>
+                      </form>
+                    <button type="submit" onclick="javascript:addsubmit()">+</button>
+                </div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+    $(function(){
+        content = get_xml('{{ products|tojson }}');
+        document.getElementById("tbody").innerHTML = content;
+    });
+
+
+    function addsubmit() {
+        var form = document.getElementById('form')
+        if (form[0].value=='' || form[1].value=='' || form[2].value=='' || form[3].value=='') {
+            alert('error');
+            return '';
+        }
+        content = add(form[0].value,form[1].value,form[2].value,form[3].value);
+      //  console.log(content)
+        var oSerializer = new XMLSerializer();
+        var sXML = oSerializer.serializeToString(content);  //序列化不可少
+       // console.log(sXML);
+        $.ajax({
+                    url:'/product/addProduct/',
+                    data:JSON.stringify({
+                        'info':sXML
+                    }),
+                    type:'post',
+                    dataType:'json',
+                    contentType:"application/json",
+                    success:function (data) {
+                        if(data.msg=='success'){
+                        location.reload();
+                        }
+                    }
+                });
+    }
+
+</script>
+</body>
+</html>
