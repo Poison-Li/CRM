@@ -3,111 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
 
-<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
-    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
-
-<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
-    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src={{ url_for('static', filename='trade/trade_do_xml.js') }}></script>
 
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </head>
 <body>
-<div class="container">
-	<div class="row clearfix">
-		<div class="col-md-12 column">
-			<div class="row clearfix">
-				<div class="col-md-12 column">
-					<h3>
-					    CRM系统
-                    </h3>
-                    <ul>
-                        <li><a href={{ url_for('customer.get_customers') }}>customer</a></li>
-                        <li><a href={{ url_for('product.get_products') }}> product</a> </li>
-                    </ul>
-				</div>
-			</div>
-			<div class="row clearfix">
-				<div class="col-md-12 column">
-					<table class="table" id="table">
-						<thead>
-							<tr>
-								<th>
-									ID
-								</th>
-								<th>
-									客户
-								</th>
-								<th>
-									产品
-								</th>
-								<th>
-									数量
-								</th>
-                                <th>
-									总价
-								</th>
-                                <th id='modify'>
-                                    修改
-                                </th>
-                                <th id="delete">
-                                    删除
-                                </th>
-							</tr>
-						</thead>
-						<tbody id="tbody">
 
-						</tbody>
-					</table>
-				</div>
-                <div>
-                      <form id="form" name="form">
-                        客户:<input type="text"/>
-                        产品:<input type="text"/>
-                        数量:<input type="text"/>
-                        总价:<input type="text"/>
-                      </form>
-                    <button type="submit" onclick="javascript:addsubmit()">+</button>
+<div class="container">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <div class="row clearfix">
+                <div class="col-md-12 column" id="switch_button">
+                    <h3>
+                        CRM系统
+                    </h3>
+                    <a href={{ url_for('customer.get_customers') }}>
+                        <el-button>Customer</el-button>
+                    </a>
+                    <a href={{ url_for('product.get_products') }}>
+                        <el-button>Product</el-button>
+                    </a>
+                    <el-button disabled>Trade</el-button>
                 </div>
-			</div>
-		</div>
-	</div>
+            </div>
+            <div class="row clearfix">
+                <div id="fuck">
+                    <el-table id="customer_table"
+                              :data="tableData"
+                              stripe
+                              style="width: 100%">
+                        <el-table-column
+                                prop="id"
+                                label="ID">
+                        </el-table-column>
+                        <el-table-column
+                                prop="customer"
+                                label="客户">
+                        </el-table-column>
+                        <el-table-column
+                                prop="product"
+                                label="产品">
+                        </el-table-column>
+                        <el-table-column
+                                prop="num"
+                                label="数量">
+                        </el-table-column>
+                        <el-table-column
+                                prop="total"
+                                label="总计">
+                        </el-table-column>
+                        <el-table-column
+                                prop="option"
+                                fixed="right"
+                                align="center"
+                                label="操作">
+                            <template slot-scope="scope">
+                                <el-button
+                                        @click="edit(scope.row)">编辑
+                                </el-button>
+                                <el-button
+                                        type="danger"
+                                        @click="handleDelete(scope.row.id)">删除
+                                </el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <el-dialog title="编辑信息" :visible.sync="dialogFormVisible" width="25%">
+                        <el-form :model="edit_data" label-width="50px">
+                            <el-form-item label="客户">
+                                <el-input v-model="edit_data.customer" placeholder="客户"></el-input>
+                            </el-form-item>
+                            <el-form-item label="产品">
+                                <el-input v-model="edit_data.product" placeholder="请选择"></el-input>
+                            </el-form-item>
+                            <el-form-item label="数量">
+                                <el-input v-model="edit_data.num" placeholder="数量"></el-input>
+                            </el-form-item>
+                            <el-form-item label="总计">
+                                <el-input v-model="edit_data.total" placeholder="总计"></el-input>
+                            </el-form-item>
+                        </el-form>
+                        <div slot="footer" class="dialog-footer">
+                            <el-button @click="dialogFormVisible = false">取 消</el-button>
+                            <el-button type="primary" @click="edit_submit">确 定</el-button>
+                        </div>
+                    </el-dialog>
+                </div>
+                <el-form id="customer_add_form" :inline="true" :model="formInline" class="demo-form-inline">
+                    <el-form-item label="客户">
+                        <el-input v-model="formInline.customer" placeholder="客户"></el-input>
+                    </el-form-item>
+                    <el-form-item label="产品">
+                        <el-input v-model="formInline.product" placeholder="请选择"></el-input>
+                    </el-form-item>
+                    <el-form-item label="数量">
+                        <el-input v-model="formInline.num" placeholder="数量"></el-input>
+                    </el-form-item>
+                    <el-form-item label="总计">
+                        <el-input v-model="formInline.total" placeholder="总计"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="onSubmit">添加</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    $(function(){
-        content = get_xml('{{ trades|tojson }}');
-        document.getElementById("tbody").innerHTML = content;
-    });
-
-
-    function addsubmit() {
-        var form = document.getElementById('form')
-        if (form[0].value=='' || form[1].value=='' || form[2].value=='' || form[3].value=='') {
-            alert('error');
-            return '';
-        }
-        content = add(form[0].value,form[1].value,form[2].value,form[3].value);
-      //  console.log(content)
-        var oSerializer = new XMLSerializer();
-        var sXML = oSerializer.serializeToString(content);  //序列化不可少
-       // console.log(sXML);
-        $.ajax({
-                    url:'/trade/addTrade/',
-                    data:JSON.stringify({
-                        'info':sXML
+    var customer_table = new Vue({
+        el: '#fuck',
+        data: {
+            tableData: prase_xml('{{ trades|tojson }}'),
+            dialogFormVisible: false,
+            edit_data: {}
+        },
+        methods: {
+            handleDelete: function (id) {
+                del(id)
+            },
+            edit: function (row_data) {
+                this.dialogFormVisible = true;
+                this.edit_data = {
+                    'id': row_data.id,
+                    'customer': row_data.customer,
+                    'product': row_data.product,
+                    'num': row_data.price,
+                    'total': row_data.total
+                }
+            },
+            edit_submit: function () {
+                content = add(this.edit_data.customer, this.edit_data.product, this.edit_data.price, this.edit_data.total);
+                var oSerializer = new XMLSerializer();
+                var sXML = oSerializer.serializeToString(content);
+                $.ajax({
+                    url: '/trade/modify/',
+                    data: JSON.stringify({
+                        'id': this.edit_data.id,
+                        'info': sXML
                     }),
-                    type:'post',
-                    dataType:'json',
-                    contentType:"application/json",
-                    success:function (data) {
-                        if(data.msg=='success'){
-                        location.reload();
+                    type: 'post',
+                    contentType: "application/json",
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.msg == 'success') {
+                            this.dialogFormVisible = true;
+                            location.reload()
                         }
                     }
                 });
-    }
+            }
+        }
+    });
+
+    var customer_add_form = new Vue({
+        el: '#customer_add_form',
+        data() {
+            return {
+                formInline: {
+                    customer: '',
+                    product: '',
+                    num: '',
+                    total: ''
+                }
+            }
+        },
+        methods: {
+            onSubmit() {
+                content = add(this.formInline.customer,
+                    this.formInline.product,
+                    this.formInline.num,
+                    this.formInline.total);
+                var oSerializer = new XMLSerializer();
+                var sXML = oSerializer.serializeToString(content);  //序列化不可少
+                // console.log(sXML);
+                $.ajax({
+                    url: '/trade/addTrade/',
+                    data: JSON.stringify({
+                        'info': sXML
+                    }),
+                    type: 'post',
+                    dataType: 'json',
+                    contentType: "application/json",
+                    success: function (data) {
+                        if (data.msg == 'success') {
+                            location.reload()
+                        }
+                    }
+                });
+            }
+        }
+    })
+
+    var switch_button = new Vue({
+        el: "#switch_button",
+        data() {
+            return {}
+        },
+        methods: {}
+    })
 
 </script>
 </body>

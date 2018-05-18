@@ -35,8 +35,8 @@ class ProductItem(db.Model):
 
     def update_xml_id(self):
         pattern = '<product id="">'
-        pattern_id = '<product id="' + str(self.cid) + '">'
-        self.cinfo.replace(pattern, pattern_id)
+        pattern_id = '<product id="' + str(self.pid) + '">'
+        self.pinfo.replace(pattern, pattern_id)
 
 
 class Trade(db.Model):
@@ -50,5 +50,5 @@ class Trade(db.Model):
 
     def update_xml_id(self):
         pattern = '<trade id="">'
-        pattern_id = '<trade id="' + str(self.cid) + '">'
-        self.cinfo.replace(pattern, pattern_id)
+        pattern_id = '<trade id="' + str(self.id) + '">'
+        self.info.replace(pattern, pattern_id)

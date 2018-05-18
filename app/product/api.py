@@ -4,6 +4,7 @@ from app import db
 from app.models import ProductItem
 import json
 
+
 # con = mysql.connect()
 
 
@@ -20,7 +21,7 @@ def get_products():
 
     product_tuple = ProductItem.query.all()
 
-    products = [{'id': item[0], 'info': item[1]} for item in product_tuple]
+    products = [{'id': item.pid, 'info': item.pinfo} for item in  product_tuple]
     json1 = json.dumps({'products': products})
 
     return render_template('products.html', products=json1)
@@ -45,7 +46,7 @@ def add_product():
     product.update_xml_id()
     db.session.commit()
 
-    return jsonify({'msg': 'success'})
+    return jsonify({'msg': 'success', 'id': product.pid})
 
 
 @bp.route('/del/', methods=['post', 'get'])

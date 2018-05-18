@@ -29,6 +29,7 @@
                     <h3>
                         CRM系统
                     </h3>
+                    <el-button disabled>Customer</el-button>
                     <a href={{ url_for('product.get_products') }}>
                         <el-button>Product</el-button>
                     </a>
@@ -90,7 +91,7 @@
                                     <el-option label="女" value="女"></el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item label="年龄" size="small">
+                            <el-form-item label="年龄">
                                 <el-input v-model="edit_data.age" placeholder="年龄"></el-input>
                             </el-form-item>
                             <el-form-item label="电话">
@@ -113,7 +114,7 @@
                             <el-option label="女" value="女"></el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="年龄" size="small">
+                    <el-form-item label="年龄">
                         <el-input v-model="formInline.age" placeholder="年龄"></el-input>
                     </el-form-item>
                     <el-form-item label="电话">
@@ -216,9 +217,7 @@
     var switch_button = new Vue({
         el: "#switch_button",
         data() {
-            return{
-                
-            }
+            return {}
         },
         methods: {}
     })

@@ -21,7 +21,7 @@ def get_trades():
 
     trade_tuple = Trade.query.all()
 
-    trades = [{'id': item[0], 'info': item[1]} for item in trade_tuple]
+    trades = [{'id': item.id, 'info': item.info} for item in trade_tuple]
     json1 = json.dumps({'trades': trades})
 
     return render_template('trades.html', trades=json1)
@@ -45,7 +45,7 @@ def add_trade():
     trade.update_xml_id()
     db.session.commit()
 
-    return jsonify({'msg': 'success'})
+    return jsonify({'msg': 'success', 'id': trade.id})
 
 
 @bp.route('/del/', methods=['post', 'get'])
