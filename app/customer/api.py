@@ -44,7 +44,7 @@ def add_customer():
     db.session.commit()
     customer.update_xml_id()
     db.session.commit()
-    return jsonify({'msg': 'success'})
+    return jsonify({'msg': 'success', 'id': customer.cid})
 
 
 @bp.route('/del/', methods=['post', 'get'])
