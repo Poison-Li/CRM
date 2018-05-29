@@ -19,7 +19,7 @@ function loadXMLStr(text) {
 }
 
 
-function add(var1, var2, var3, var4) {
+function add(var1, var2, var3, var4, var5) {
     xmlDoc = loadXMLStr('<?xml version="1.0" encoding="UTF-8"?>\n' +
         '<trades>\n' +
         '</trades>');
@@ -30,19 +30,24 @@ function add(var1, var2, var3, var4) {
     newtext = xmlDoc.createTextNode(var1);
     newname.appendChild(newtext);
     newcustomer.appendChild(newname);
+    
+    pid = xmlDoc.createElement('pid');
+    newtext = xmlDoc.createTextNode(var2);
+    pid.appendChild(newtext);
+    newcustomer.appendChild(pid);
 
     sex = xmlDoc.createElement('product');
-    newtext = xmlDoc.createTextNode(var2);
+    newtext = xmlDoc.createTextNode(var3);
     sex.appendChild(newtext);
     newcustomer.appendChild(sex);
 
     age = xmlDoc.createElement('num');
-    newtext = xmlDoc.createTextNode(var3);
+    newtext = xmlDoc.createTextNode(var4);
     age.appendChild(newtext);
     newcustomer.appendChild(age);
 
     phone = xmlDoc.createElement('total');
-    newtext = xmlDoc.createTextNode(var4);
+    newtext = xmlDoc.createTextNode(var5);
     phone.appendChild(newtext);
     newcustomer.appendChild(phone);
 

@@ -70,45 +70,44 @@
                                 label="操作">
                             <template slot-scope="scope">
                                 <el-button
-                                        @click="edit(scope.row)">编辑
-                                </el-button>
-                                <el-button
                                         type="danger"
                                         @click="handleDelete(scope.row.id)">删除
                                 </el-button>
                             </template>
                         </el-table-column>
                     </el-table>
-                    <el-dialog title="编辑信息" :visible.sync="dialogFormVisible" width="25%">
-                        <el-form :model="edit_data" label-width="50px">
-                            <el-form-item label="客户">
-                                <el-input v-model="edit_data.customer" placeholder="客户"></el-input>
-                            </el-form-item>
-                            <el-form-item label="产品">
-                                <el-input v-model="edit_data.product" placeholder="请选择"></el-input>
-                            </el-form-item>
-                            <el-form-item label="数量">
-                                <el-input v-model="edit_data.num" placeholder="数量"></el-input>
-                            </el-form-item>
-                            <el-form-item label="总计">
-                                <el-input v-model="edit_data.total" placeholder="总计"></el-input>
-                            </el-form-item>
-                        </el-form>
-                        <div slot="footer" class="dialog-footer">
-                            <el-button @click="dialogFormVisible = false">取 消</el-button>
-                            <el-button type="primary" @click="edit_submit">确 定</el-button>
-                        </div>
-                    </el-dialog>
                 </div>
-                <el-form id="customer_add_form" :inline="true" :model="formInline" class="demo-form-inline">
+                <el-form id="customer_add_form" rules="rules" :inline="true" :model="formInline"
+                         class="demo-form-inline">
                     <el-form-item label="客户">
-                        <el-input v-model="formInline.customer" placeholder="客户"></el-input>
+                        <el-select v-model="formInline.c_value" placeholder="请选择">
+                            <el-option
+                                    v-for="item in formInline.customer"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
                     </el-form-item>
                     <el-form-item label="产品">
-                        <el-input v-model="formInline.product" placeholder="请选择"></el-input>
+                        <el-select v-model="formInline.p_value" placeholder="请选择" @change="get_count()">
+                            <el-option
+                                    v-for="item in formInline.product"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
                     </el-form-item>
                     <el-form-item label="数量">
-                        <el-input v-model="formInline.num" placeholder="数量"></el-input>
+                        <el-select v-model="formInline.n_value" filterable placeholder="请选择" @change="get_total()">
+                            <el-option
+                                    v-for="item in formInline.num"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
                     </el-form-item>
                     <el-form-item label="总计">
                         <el-input v-model="formInline.total" placeholder="总计"></el-input>
@@ -143,27 +142,6 @@
                     'num': row_data.price,
                     'total': row_data.total
                 }
-            },
-            edit_submit: function () {
-                content = add(this.edit_data.customer, this.edit_data.product, this.edit_data.price, this.edit_data.total);
-                var oSerializer = new XMLSerializer();
-                var sXML = oSerializer.serializeToString(content);
-                $.ajax({
-                    url: '/trade/modify/',
-                    data: JSON.stringify({
-                        'id': this.edit_data.id,
-                        'info': sXML
-                    }),
-                    type: 'post',
-                    contentType: "application/json",
-                    dataType: 'json',
-                    success: function (data) {
-                        if (data.msg == 'success') {
-                            this.dialogFormVisible = true;
-                            location.reload()
-                        }
-                    }
-                });
             }
         }
     });
@@ -173,18 +151,29 @@
         data() {
             return {
                 formInline: {
-                    customer: '',
-                    product: '',
-                    num: '',
-                    total: ''
+                    customer: {{ customers|tojson }},
+                    product: {{ products|tojson }},
+                    num: [],
+                    total: '',
+                    c_value: '',
+                    p_value: '',
+                    p_id: '',
+                    n_value: '',
+                    price: 0
+                },
+                rules: {
+                    customer: [
+                        {required: true, message: '请选择活动区域', trigger: 'change'}
+                    ]
                 }
             }
         },
         methods: {
             onSubmit() {
-                content = add(this.formInline.customer,
-                    this.formInline.product,
-                    this.formInline.num,
+                content = add(this.formInline.c_value,
+                    this.formInline.p_id,
+                    this.formInline.p_value,
+                    this.formInline.n_value,
                     this.formInline.total);
                 var oSerializer = new XMLSerializer();
                 var sXML = oSerializer.serializeToString(content);  //序列化不可少
@@ -192,7 +181,9 @@
                 $.ajax({
                     url: '/trade/addTrade/',
                     data: JSON.stringify({
-                        'info': sXML
+                        'info': sXML,
+                        'pid': this.formInline.p_id,
+                        'num': this.formInline.n_value
                     }),
                     type: 'post',
                     dataType: 'json',
@@ -203,9 +194,25 @@
                         }
                     }
                 });
+            },
+            get_count() {
+                for (var i = 0; i < this.formInline.product.length; i++) {
+                    if (this.formInline.product[i]['value'] = this.formInline.p_value) {
+                        var count = this.formInline.product[i]['count'];
+                        for (var j = 1; j <= count; j++) {
+                            this.formInline.num.push({'value': j, 'label': j})
+                        }
+                        this.formInline.price = this.formInline.product[i]['price'];
+                        this.formInline.p_id = this.formInline.product[i]['value'];
+                        break
+                    }
+                }
+            },
+            get_total() {
+                this.formInline.total = this.formInline.price * this.formInline.n_value
             }
         }
-    })
+    });
 
     var switch_button = new Vue({
         el: "#switch_button",

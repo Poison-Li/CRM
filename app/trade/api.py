@@ -1,7 +1,8 @@
 from app.trade import bp
+import re
 from flask import request, render_template, jsonify, session, redirect, url_for
 from app import db
-from app.models import Trade
+from app.models import CustomerItem, ProductItem, Trade
 import json
 
 # con = mysql.connect()
@@ -24,7 +25,11 @@ def get_trades():
     trades = [{'id': item.id, 'info': item.info} for item in trade_tuple]
     json1 = json.dumps({'trades': trades})
 
-    return render_template('trades.html', trades=json1)
+    customers = [item.get_id_name() for item in CustomerItem.query.all()]
+
+    products = [item.get_info() for item in ProductItem.query.all()]
+
+    return render_template('trades.html', trades=json1, customers=customers, products=products)
 
 
 @bp.route('/addTrade/', methods=['post', 'get'])
@@ -42,7 +47,8 @@ def add_trade():
     trade = Trade(info=xml)
     db.session.add(trade)
     db.session.commit()
-    trade.update_xml_id()
+    trade.update_xml()
+
     db.session.commit()
 
     return jsonify({'msg': 'success', 'id': trade.id})
@@ -55,6 +61,13 @@ def del_trade():
     id = request.args.get('id')
 
     trade = Trade.query.filter_by(id=id).first_or_404()
+
+    old_num = re.findall('<num>(.*?)</num>', trade.info)[0]
+
+    pid = re.findall('<pid>(.*?)</pid>', trade.info)[0]
+
+    ProductItem.update(pid, int(old_num))
+
     if trade:
         db.session.delete(trade)
         db.session.commit()
